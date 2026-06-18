@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import ProductList from './components/ProductList';
 import CartPanel from './components/Cart';
-import type { Product, Cart } from './types';
+import OrderConfirmation from './components/OrderConfirmation';
+import type { Product, Cart, CheckoutResult } from './types';
 import * as api from './api';
 import './App.css';
 
@@ -14,6 +15,8 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<Cart>(emptyCart);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [confirmation, setConfirmation] = useState<CheckoutResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const clearError = () => setError(null);
@@ -58,6 +61,25 @@ export default function App() {
     }
   }, []);
 
+  const handleCheckout = useCallback(async (discountCode?: string) => {
+    clearError();
+    setCheckingOut(true);
+    try {
+      const result = await api.checkout(discountCode);
+      setCart(emptyCart);
+      setConfirmation(result);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setCheckingOut(false);
+    }
+  }, []);
+
+  const handleContinue = useCallback(() => {
+    setConfirmation(null);
+    api.getCart().then(setCart).catch(() => {});
+  }, []);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -92,12 +114,18 @@ export default function App() {
             onAdd={handleAdd}
             loading={productsLoading}
           />
-          <CartPanel
-            cart={cart}
-            products={products}
-            onUpdate={handleUpdate}
-            onRemove={handleRemove}
-          />
+          {confirmation ? (
+            <OrderConfirmation result={confirmation} onContinue={handleContinue} />
+          ) : (
+            <CartPanel
+              cart={cart}
+              products={products}
+              onUpdate={handleUpdate}
+              onRemove={handleRemove}
+              onCheckout={handleCheckout}
+              checkingOut={checkingOut}
+            />
+          )}
         </main>
       )}
 
