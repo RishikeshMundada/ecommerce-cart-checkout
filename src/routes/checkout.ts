@@ -10,8 +10,8 @@ function customerId(req: Request): string {
 router.post('/', (req: Request, res: Response, next: NextFunction) => {
   try {
     const { discountCode } = req.body;
-    const order = checkoutService.checkout(customerId(req), discountCode);
-    res.status(201).json(order);
+    const result = checkoutService.checkout(customerId(req), discountCode);
+    res.status(201).json(result);
   } catch (err) {
     next(err);
   }

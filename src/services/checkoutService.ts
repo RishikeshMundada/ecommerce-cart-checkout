@@ -3,8 +3,14 @@ import { orders, products } from '../store';
 import { Order } from '../models/order';
 import { AppError } from '../utils/errors';
 import { getCart, clearCart } from './cartService';
+import { validateCode, redeemCode, maybeGenerateCode } from './discountService';
 
-export function checkout(customerId: string, discountCode?: string): Order {
+export interface CheckoutResult {
+  order: Order;
+  newDiscountCode?: string;
+}
+
+export function checkout(customerId: string, discountCode?: string): CheckoutResult {
   const cart = getCart(customerId);
 
   if (cart.items.length === 0) {
@@ -28,27 +34,38 @@ export function checkout(customerId: string, discountCode?: string): Order {
     orderItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0).toFixed(2)
   );
 
-  // discount validation and nth-order code generation added in stage 5
-  const discountAmount = 0;
-  const total = subtotal;
+  // Validate before mutating any state so a bad code leaves everything unchanged.
+  let discountAmount = 0;
+  let appliedCode: string | undefined;
+
+  if (discountCode) {
+    const discount = validateCode(discountCode);
+    discountAmount = parseFloat(((subtotal * discount.percent) / 100).toFixed(2));
+    appliedCode = discountCode;
+  }
+
+  const total = parseFloat((subtotal - discountAmount).toFixed(2));
 
   const order: Order = {
     id: randomUUID(),
     customerId,
     items: orderItems,
     subtotal,
+    discountCode: appliedCode,
     discountAmount,
     total,
     createdAt: new Date(),
   };
 
-  if (discountCode) {
-    // placeholder: unknown codes are silently ignored until stage 5 wires validation
-    void discountCode;
+  orders.push(order);
+
+  if (appliedCode) {
+    redeemCode(appliedCode);
   }
 
-  orders.push(order);
   clearCart(customerId);
 
-  return order;
+  const generated = maybeGenerateCode();
+
+  return { order, newDiscountCode: generated?.code };
 }
