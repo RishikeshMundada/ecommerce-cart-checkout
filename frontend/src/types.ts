@@ -51,3 +51,11 @@ export interface StoreStats {
   totalDiscountAmount: number;
   discountCodes: DiscountCodeEntry[];
 }
+
+export interface GenerateDiscountResult {
+  conditionMet: boolean;
+  code?: string;
+  percent?: number;
+  currentOrderCount?: number;
+  nextDiscountAt?: number;
+}

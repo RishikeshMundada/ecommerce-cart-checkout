@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ProductList from './components/ProductList';
 import CartPanel from './components/Cart';
 import OrderConfirmation from './components/OrderConfirmation';
+import AdminStats from './components/AdminStats';
 import type { Product, Cart, CheckoutResult } from './types';
 import * as api from './api';
 import './App.css';
@@ -131,7 +132,7 @@ export default function App() {
 
       {tab === 'admin' && (
         <main className="admin-layout">
-          <p>Admin stats will appear here.</p>
+          <AdminStats />
         </main>
       )}
     </div>

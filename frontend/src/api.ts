@@ -1,4 +1,4 @@
-import type { Product, Cart, CheckoutResult, StoreStats } from './types';
+import type { Product, Cart, CheckoutResult, StoreStats, GenerateDiscountResult } from './types';
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
@@ -77,7 +77,7 @@ export async function getStats(): Promise<StoreStats> {
   return parseResponse(await fetch(`${BASE}/admin/stats`, { headers: headers() }));
 }
 
-export async function generateDiscount(): Promise<unknown> {
+export async function generateDiscount(): Promise<GenerateDiscountResult> {
   return parseResponse(
     await fetch(`${BASE}/admin/discount`, { method: 'POST', headers: headers() })
   );
