@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import productsRouter from './routes/products';
 import cartRouter from './routes/cart';
+import checkoutRouter from './routes/checkout';
 import { AppError } from './utils/errors';
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.use('/products', productsRouter);
 app.use('/cart', cartRouter);
+app.use('/checkout', checkoutRouter);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
