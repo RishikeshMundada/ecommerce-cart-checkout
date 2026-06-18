@@ -15,3 +15,9 @@ export const products: Product[] = [
 export const carts = new Map<string, Cart>();
 export const orders: Order[] = [];
 export const discountCodes = new Map<string, DiscountCode>();
+
+export function resetStore(): void {
+  carts.clear();
+  orders.splice(0);
+  discountCodes.clear();
+}
